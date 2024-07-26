@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+        <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+        <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+        <edmx:Include Alias="UI" Namespace="com.sap.vocabularies.UI.v1"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema Namespace="jk" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+            <EntityContainer Name="EntityContainer">
+                <EntitySet Name="Customer" EntityType="jk.Customer">
+                    <NavigationPropertyBinding Path="ord" Target="Order"/>
+                    <NavigationPropertyBinding Path="SiblingEntity" Target="Customer"/>
+                </EntitySet>
+                <EntitySet Name="Order" EntityType="jk.Order">
+                    <NavigationPropertyBinding Path="orderNumber" Target="Customer"/>
+                    <NavigationPropertyBinding Path="SiblingEntity" Target="Order"/>
+                </EntitySet>
+            </EntityContainer>
+            <EntityType Name="Customer">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                    <PropertyRef Name="IsActiveEntity"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="customer_id" Type="Edm.String" MaxLength="20"/>
+                <Property Name="customer_name" Type="Edm.String" MaxLength="20"/>
+                <Property Name="email" Type="Edm.String" MaxLength="20"/>
+                <Property Name="address" Type="Edm.String" MaxLength="20"/>
+                <NavigationProperty Name="ord" Type="Collection(jk.Order)" Partner="orderNumber">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <Property Name="IsActiveEntity" Type="Edm.Boolean" Nullable="false" DefaultValue="true"/>
+                <Property Name="HasActiveEntity" Type="Edm.Boolean" Nullable="false" DefaultValue="false"/>
+                <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false" DefaultValue="false"/>
+                <NavigationProperty Name="DraftAdministrativeData" Type="jk.DraftAdministrativeData" ContainsTarget="true"/>
+                <NavigationProperty Name="SiblingEntity" Type="jk.Customer"/>
+            </EntityType>
+            <EntityType Name="Order">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                    <PropertyRef Name="IsActiveEntity"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+                <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+                <NavigationProperty Name="orderNumber" Type="jk.Customer" Partner="ord">
+                    <ReferentialConstraint Property="orderNumber_ID" ReferencedProperty="ID"/>
+                </NavigationProperty>
+                <Property Name="orderNumber_ID" Type="Edm.Guid"/>
+                <Property Name="orderDate" Type="Edm.Date"/>
+                <Property Name="shippingAddress" Type="Edm.String" MaxLength="100"/>
+                <Property Name="billingAddress" Type="Edm.String" MaxLength="100"/>
+                <Property Name="totalAmount" Type="Edm.Decimal" Precision="10" Scale="2"/>
+                <Property Name="IsActiveEntity" Type="Edm.Boolean" Nullable="false" DefaultValue="true"/>
+                <Property Name="HasActiveEntity" Type="Edm.Boolean" Nullable="false" DefaultValue="false"/>
+                <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false" DefaultValue="false"/>
+                <NavigationProperty Name="DraftAdministrativeData" Type="jk.DraftAdministrativeData" ContainsTarget="true"/>
+                <NavigationProperty Name="SiblingEntity" Type="jk.Order"/>
+            </EntityType>
+            <EntityType Name="DraftAdministrativeData">
+                <Key>
+                    <PropertyRef Name="DraftUUID"/>
+                </Key>
+                <Property Name="DraftUUID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="CreationDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="CreatedByUser" Type="Edm.String" MaxLength="256"/>
+                <Property Name="DraftIsCreatedByMe" Type="Edm.Boolean"/>
+                <Property Name="LastChangeDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="LastChangedByUser" Type="Edm.String" MaxLength="256"/>
+                <Property Name="InProcessByUser" Type="Edm.String" MaxLength="256"/>
+                <Property Name="DraftIsProcessedByMe" Type="Edm.Boolean"/>
+            </EntityType>
+            <Action Name="draftPrepare" IsBound="true" EntitySetPath="in">
+                <Parameter Name="in" Type="jk.Customer"/>
+                <Parameter Name="SideEffectsQualifier" Type="Edm.String"/>
+                <ReturnType Type="jk.Customer"/>
+            </Action>
+            <Action Name="draftPrepare" IsBound="true" EntitySetPath="in">
+                <Parameter Name="in" Type="jk.Order"/>
+                <Parameter Name="SideEffectsQualifier" Type="Edm.String"/>
+                <ReturnType Type="jk.Order"/>
+            </Action>
+            <Action Name="draftActivate" IsBound="true" EntitySetPath="in">
+                <Parameter Name="in" Type="jk.Customer"/>
+                <ReturnType Type="jk.Customer"/>
+            </Action>
+            <Action Name="draftEdit" IsBound="true" EntitySetPath="in">
+                <Parameter Name="in" Type="jk.Customer"/>
+                <Parameter Name="PreserveChanges" Type="Edm.Boolean"/>
+                <ReturnType Type="jk.Customer"/>
+            </Action>
+            <Annotations Target="jk.Customer">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="CustomerID"/>
+                            <PropertyValue Property="Value" Path="customer_id"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="customer_name"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="email"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="address"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.FieldGroup" Qualifier="ProductInformation">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="customer_id"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="customer_name"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="email"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="address"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.Facets">
+                    <Collection>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="CustomerInfoFacet"/>
+                            <PropertyValue Property="Label" String="Customer Information"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#ProductInformation"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="OrderGeneralInformation"/>
+                            <PropertyValue Property="Label" String="General Information"/>
+                            <PropertyValue Property="Target" AnnotationPath="ord/@UI.LineItem"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="jk.EntityContainer/Customer">
+                <Annotation Term="Common.DraftRoot">
+                    <Record Type="Common.DraftRootType">
+                        <PropertyValue Property="ActivationAction" String="jk.draftActivate"/>
+                        <PropertyValue Property="EditAction" String="jk.draftEdit"/>
+                        <PropertyValue Property="PreparationAction" String="jk.draftPrepare"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="jk.Customer/ID">
+                <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/createdAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="Created On"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/createdBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="User's unique ID"/>
+                <Annotation Term="Common.Label" String="Created By"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/modifiedAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="Changed On"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/modifiedBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="User's unique ID"/>
+                <Annotation Term="Common.Label" String="Changed By"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/customer_id">
+                <Annotation Term="Common.Label" String="CustomerID"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/customer_name">
+                <Annotation Term="Common.Label" String="Customer Name"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/email">
+                <Annotation Term="Common.Label" String="E-mail"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/address">
+                <Annotation Term="Common.Label" String="Address"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/IsActiveEntity">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/HasActiveEntity">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/HasDraftEntity">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.Customer/DraftAdministrativeData">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.Order">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="orderNumber_ID"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="orderDate"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="shippingAddress"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="billingAddress"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="totalAmount"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.FieldGroup" Qualifier="OrderDetails">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="orderNumber_ID"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="orderDate"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="shippingAddress"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="billingAddress"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="totalAmount"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.Facets">
+                    <Collection>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="OrderGeneralInformation"/>
+                            <PropertyValue Property="Label" String="General Information"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#OrderDetails"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="jk.EntityContainer/Order">
+                <Annotation Term="Common.DraftNode">
+                    <Record Type="Common.DraftNodeType">
+                        <PropertyValue Property="PreparationAction" String="jk.draftPrepare"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="jk.Order/ID">
+                <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.Order/createdAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="Created On"/>
+            </Annotations>
+            <Annotations Target="jk.Order/createdBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="Core.Immutable" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="User's unique ID"/>
+                <Annotation Term="Common.Label" String="Created By"/>
+            </Annotations>
+            <Annotations Target="jk.Order/modifiedAt">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Common.Label" String="Changed On"/>
+            </Annotations>
+            <Annotations Target="jk.Order/modifiedBy">
+                <Annotation Term="UI.HiddenFilter" Bool="true"/>
+                <Annotation Term="Core.Computed" Bool="true"/>
+                <Annotation Term="Core.Description" String="User's unique ID"/>
+                <Annotation Term="Common.Label" String="Changed By"/>
+            </Annotations>
+            <Annotations Target="jk.Order/orderNumber">
+                <Annotation Term="Common.Label" String="Order Number"/>
+            </Annotations>
+            <Annotations Target="jk.Order/orderNumber_ID">
+                <Annotation Term="Common.Label" String="Order Number"/>
+            </Annotations>
+            <Annotations Target="jk.Order/orderDate">
+                <Annotation Term="Common.Label" String="Order Date"/>
+            </Annotations>
+            <Annotations Target="jk.Order/shippingAddress">
+                <Annotation Term="Common.Label" String="Shipping Address"/>
+            </Annotations>
+            <Annotations Target="jk.Order/billingAddress">
+                <Annotation Term="Common.Label" String="Billing Address"/>
+            </Annotations>
+            <Annotations Target="jk.Order/totalAmount">
+                <Annotation Term="Common.Label" String="Total Amount"/>
+            </Annotations>
+            <Annotations Target="jk.Order/IsActiveEntity">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.Order/HasActiveEntity">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.Order/HasDraftEntity">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.Order/DraftAdministrativeData">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.DraftAdministrativeData">
+                <Annotation Term="Common.Label" String="Draft Administrative Data"/>
+            </Annotations>
+            <Annotations Target="jk.DraftAdministrativeData/DraftUUID">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+                <Annotation Term="Common.Label" String="Draft (Technical ID)"/>
+                <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+            </Annotations>
+            <Annotations Target="jk.DraftAdministrativeData/CreationDateTime">
+                <Annotation Term="Common.Label" String="Draft Created On"/>
+            </Annotations>
+            <Annotations Target="jk.DraftAdministrativeData/CreatedByUser">
+                <Annotation Term="Common.Label" String="Draft Created By"/>
+            </Annotations>
+            <Annotations Target="jk.DraftAdministrativeData/DraftIsCreatedByMe">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+                <Annotation Term="Common.Label" String="Draft Created By Me"/>
+            </Annotations>
+            <Annotations Target="jk.DraftAdministrativeData/LastChangeDateTime">
+                <Annotation Term="Common.Label" String="Draft Last Changed On"/>
+            </Annotations>
+            <Annotations Target="jk.DraftAdministrativeData/LastChangedByUser">
+                <Annotation Term="Common.Label" String="Draft Last Changed By"/>
+            </Annotations>
+            <Annotations Target="jk.DraftAdministrativeData/InProcessByUser">
+                <Annotation Term="Common.Label" String="Draft In Process By"/>
+            </Annotations>
+            <Annotations Target="jk.DraftAdministrativeData/DraftIsProcessedByMe">
+                <Annotation Term="UI.Hidden" Bool="true"/>
+                <Annotation Term="Common.Label" String="Draft In Process By Me"/>
+            </Annotations>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

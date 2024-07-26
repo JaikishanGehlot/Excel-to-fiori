@@ -1,0 +1,28 @@
+{
+  "name": "Exceldata",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^7",
+    "express": "^4",
+    "glob": "^11.0.0",
+    "path": "^0.12.7",
+    "url": "^0.11.3",
+    "xlsx": "^0.18.5",
+    "yeoman-generator": "^7.3.2"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap/ux-specification": "^1.120.14"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-order": "cds watch --open order/webapp/index.html?sap-ui-xx-viewCache=false"
+  },
+  "sapux": [
+    "app/order"
+  ]
+}
